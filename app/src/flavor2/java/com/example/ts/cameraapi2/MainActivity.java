@@ -28,28 +28,17 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.c1).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Log.e("-------","----wxy---" + getStatus(MainActivity.this,"wxy"));
-//                startCamera();
+                Intent intent = new Intent(MainActivity.this,Camera1Activity.class);
+                startActivity(intent);
             }
         });
 
         findViewById(R.id.c2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startCamera();
+                Intent intent = new Intent(MainActivity.this,Camera2Activity.class);
+                startActivity(intent);
             }
         });
     }
-
-    public static boolean getStatus(Context context,String key) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(
-                "vat_mode", Context.MODE_MULTI_PROCESS);
-        return sharedPreferences.getBoolean(key, false);
-    }
-    private void startCamera(){
-        Intent intent = new Intent(MainActivity.this,Camera1Activity.class);
-        startActivity(intent);
-    }
-
 }

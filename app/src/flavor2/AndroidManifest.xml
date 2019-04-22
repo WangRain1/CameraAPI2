@@ -6,6 +6,7 @@
 <manifest package="com.example.ts.cameraapi2"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Public(1/2) permission -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
@@ -32,7 +33,7 @@
         </activity>
 
         <activity android:name=".Camera1Activity"></activity>
-
+        <activity android:name=".Camera2Activity"></activity>
 
     </application>
 

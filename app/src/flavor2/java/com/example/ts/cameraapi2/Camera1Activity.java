@@ -51,7 +51,8 @@ public class Camera1Activity extends AppCompatActivity {
         OrientationEventListener listener = new OrientationEventListener(this) {
             @Override
             public void onOrientationChanged(int orientation) {
-                Log.e("onPictureTaken", "---------orientation------" + orientation);
+                int rotation = getWindowManager().getDefaultDisplay().getRotation();
+                Log.e("onPictureTaken", rotation + "---------orientation------" + orientation);
             }
         };
         listener.enable();
