@@ -54,7 +54,7 @@ public class Camera2Activity extends AppCompatActivity {
 
     //预览画面配置
     Size previewSize;
-
+    SurfaceTexture mSurface;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,18 +72,19 @@ public class Camera2Activity extends AppCompatActivity {
     private void init() {
         //1.camera 入口
         mManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-        //2.检测是否支持camera2特性
-        checkCameraCharacteristics();
+        createSurface();
+
     }
 
-    private void createSurface(final CameraCharacteristics characteristics) {
-
+    private void createSurface() {
         //创建预览画面
         TextureView textureView = findViewById(R.id.camera_preview);
         textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                previewSize = getPreviewSize(characteristics);
+                mSurface = surface;
+                //2.检测是否支持camera2特性
+                checkCameraCharacteristics();
             }
 
             @Override
@@ -98,51 +99,7 @@ public class Camera2Activity extends AppCompatActivity {
 
             @Override
             public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-                surface.setDefaultBufferSize(previewSize.getWidth(),previewSize.getHeight());
-                final Surface previewSurface = new Surface(surface);
-                List<Surface> outputs = new ArrayList<>();
-                outputs.add(previewSurface);
-                try {
-                    //创建 CaptureRequest 对象
-                    mCameraDevice.createCaptureSession(outputs, new CameraCaptureSession.StateCallback() {
-                        @Override
-                        public void onConfigured(@NonNull CameraCaptureSession session) {
-                            CaptureRequest.Builder requestBuilder = null;
-                            try {
-                                requestBuilder = mCameraDevice.createCaptureRequest(CameraDevice
-                                        .TEMPLATE_PREVIEW);
-                                requestBuilder.addTarget(previewSurface);
-                                CaptureRequest captureRequest = requestBuilder.build();
-                                session.setRepeatingRequest(captureRequest, new CameraCaptureSession.CaptureCallback() {
-                                    @Override
-                                    public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
-                                        super.onCaptureStarted(session, request, timestamp, frameNumber);
-                                    }
 
-                                    @Override
-                                    public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
-                                        super.onCaptureCompleted(session, request, result);
-
-//                                        session.stopRepeating();
-                                    }
-                                    @Override
-                                    public void onCaptureFailed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureFailure failure) {
-                                        super.onCaptureFailed(session, request, failure);
-                                    }
-                                },null);
-                            } catch (CameraAccessException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        @Override
-                        public void onConfigureFailed(@NonNull CameraCaptureSession session) {
-
-                        }
-                    },null);
-                } catch (CameraAccessException e) {
-                    e.printStackTrace();
-                }
             }
         });
     }
@@ -202,7 +159,52 @@ public class Camera2Activity extends AppCompatActivity {
             @Override
             public void onOpened(@NonNull CameraDevice camera) {
                 mCameraDevice = camera;
-                createSurface(characteristics);
+                previewSize = getPreviewSize(characteristics);
+                mSurface.setDefaultBufferSize(previewSize.getWidth(),previewSize.getHeight());
+                final Surface previewSurface = new Surface(mSurface);
+                List<Surface> outputs = new ArrayList<>();
+                outputs.add(previewSurface);
+                try {
+                    //创建 CaptureRequest 对象
+                    mCameraDevice.createCaptureSession(outputs, new CameraCaptureSession.StateCallback() {
+                        @Override
+                        public void onConfigured(@NonNull CameraCaptureSession session) {
+                            CaptureRequest.Builder requestBuilder = null;
+                            try {
+                                requestBuilder = mCameraDevice.createCaptureRequest(CameraDevice
+                                        .TEMPLATE_PREVIEW);
+                                requestBuilder.addTarget(previewSurface);
+                                CaptureRequest captureRequest = requestBuilder.build();
+                                session.setRepeatingRequest(captureRequest, new CameraCaptureSession.CaptureCallback() {
+                                    @Override
+                                    public void onCaptureStarted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, long timestamp, long frameNumber) {
+                                        super.onCaptureStarted(session, request, timestamp, frameNumber);
+                                    }
+
+                                    @Override
+                                    public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+                                        super.onCaptureCompleted(session, request, result);
+
+//                                        session.stopRepeating();
+                                    }
+                                    @Override
+                                    public void onCaptureFailed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull CaptureFailure failure) {
+                                        super.onCaptureFailed(session, request, failure);
+                                    }
+                                },null);
+                            } catch (CameraAccessException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onConfigureFailed(@NonNull CameraCaptureSession session) {
+
+                        }
+                    },null);
+                } catch (CameraAccessException e) {
+                    e.printStackTrace();
+                }
                 Toast.makeText(Camera2Activity.this,"opened",Toast.LENGTH_LONG).show();
             }
 
